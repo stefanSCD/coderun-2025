@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Treasure Hunt Compass</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+            background: #f7f7f7;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 8px;
+            width: 180px;
+        }
+
+        .error {
+            color: #b00020;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .card img {
+            max-width: 220px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Treasure Hunt Compass</h2>
+
+<div class="box">
+    <h3>Set Sail</h3>
+    <p>Enter the last instruction ID to fetch the next step from the oracle.</p>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+    {% if success %}
+        <p class="success">{{ success }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Instruction ID</label><br>
+        <input name="last_id" type="number" min="0" step="1" required placeholder="e.g. 0">
+        <button class="btn" type="submit">Fetch next direction</button>
+    </form>
+</div>
+
+<div class="box">
+    <h3>Journey Log</h3>
+
+    {% if not hunt_instructions %}
+        <p>No instructions yet. Start by entering ID 0.</p>
+    {% endif %}
+
+    {% for ins in hunt_instructions %}
+        <div class="card">
+            <div>
+                <h4>#{{ ins.instruction_id }} — {{ ins.title }}</h4>
+                <p><b>Direction:</b> {{ ins.direction }}</p>
+                <p><b>Distance:</b> {{ ins.distance_m }} meters</p>
+                <p>{{ ins.description }}</p>
+                <small>
+                    oracle_id: {{ ins.raw_payload.id|default:"-" }} |
+                    nextID: {{ ins.raw_payload.nextID|default:"-" }}
+                </small>
+            </div>
+
+            {% if ins.image_url %}
+                <img src="{{ ins.image_url }}" alt="phase image">
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
